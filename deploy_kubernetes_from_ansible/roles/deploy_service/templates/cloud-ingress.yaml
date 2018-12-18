@@ -1,0 +1,76 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+  name: cloud-ingress
+  namespace: cloud
+spec:
+  rules:
+  - host: s.dui.ai
+    http:
+      paths:
+      - backend:
+          serviceName: ddsserver
+          servicePort: 28002
+        path: /bus
+      - backend:
+          serviceName: ddsserver
+          servicePort: 28002
+        path: /user
+      - backend:
+          serviceName: pushserver
+          servicePort: 28002
+        path: /push
+      - backend:
+          serviceName: pushserver
+          servicePort: 28002
+        path: /publish
+      - backend:
+          serviceName: resserver
+          servicePort: 28002
+        path: /res
+      - backend:
+          serviceName: ddsserver
+          servicePort: 28002
+        path: /dm
+      - backend:
+          serviceName: ddsserver
+          servicePort: 28002
+        path: /log
+      - backend:
+          serviceName: webhook
+          servicePort: 28002
+        path: /webhook
+      - backend:
+          serviceName: webhook
+          servicePort: 28002
+        path: /tq
+      - backend:
+          serviceName: userproductserver
+          servicePort: 28002
+        path: /config
+      - backend:
+          serviceName: ttsserver
+          servicePort: 28002
+        path: /tts
+      - backend:
+          serviceName: cnluserver
+          servicePort: 28002
+        path: /cnlu
+      - backend:
+          serviceName: cloud-wechat
+          servicePort: 80
+        path: /wechat
+      - backend:
+          serviceName: cdmserver
+          servicePort: 28002
+        path: /cdm
+      - backend:
+          serviceName: casrserver
+          servicePort: 28002
+        path: /cn.asr.rec
+      - backend:
+          serviceName: ddsserver
+          servicePort: 28002
+        path: /

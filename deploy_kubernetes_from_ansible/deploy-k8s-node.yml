@@ -1,0 +1,5 @@
+- name: deploy kubernetes node
+  hosts: lenovo_kubernetes_node 
+  roles:
+    - install_docker 
+    - install_k8s_node

@@ -1,0 +1,4 @@
+- name: copy install rsyslogd script
+  copy: src=install_rsyslogd.sh dest=/tmp/
+- name: install rsyslogd.sh
+  shell: /bin/bash /tmp/install_rsyslogd.sh

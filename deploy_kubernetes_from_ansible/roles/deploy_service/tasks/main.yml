@@ -1,0 +1,68 @@
+- name: copy cloud-configmap.yaml
+  copy: src=cloud-configmap.yaml dest=/tmp/
+  when: role == 'master'
+- name: create cloud-configmap.yaml
+  shell: kubectl create -f /tmp/cloud-configmap.conf
+  when: role == 'master'
+- name: copy nginx-ingress-controller.yaml
+  copy: src=nginx-ingress-controller.yaml dest=/tmp/
+  when: role == 'master'
+- name: create nginx-ingress-controller.yaml
+  shell: kubectl create -f /tmp/nginx-ingress-controller.yaml
+  when: role == 'master'
+- name: copy ttsserver.yaml
+  copy: src=ttsserver.yaml dest=/tmp/ttsserver.yaml
+  when: role == 'master'
+- name: create ttsserver
+  shell: kubectl create -f /tmp/ttsserver.yaml 
+  when: role == 'master'
+- name: copy casrserver.yaml
+  copy: src=casrserver.yaml dest=/tmp/
+  when: role == 'master'
+- name: create casrserver
+  shell: kubectl create -f /tmp/casrserver.yaml
+  when: role == 'master'
+- name: copy cnluserver.yaml
+  copy: src=cnluserver.yaml dest=/tmp/
+  when: role == 'master'
+- name: create cnluserver 
+  shell: kubectl create -f /tmp/cnluserver.yaml
+  when: role == 'master'
+- name: copy ddsserver.yaml
+  copy: src=ddsserver.yaml dest=/tmp/
+  when: role == 'master'
+- name: create ddsserver 
+  shell: kubectl create -f /tmp/ddsserver.yaml
+  when: role == 'master'
+- name: copy webhook.yaml
+  copy: src=webhook.yaml dest=/tmp/
+  when: role == 'master'
+- name: create webhook 
+  shell: kubectl create -f /tmp/webhook.yaml
+  when: role == 'master'
+- name: copy cdmserver.yaml
+  copy: src=cdmserver.yaml dest=/tmp/
+  when: role == 'master'
+- name: create cdmserver 
+  shell: kubectl create -f /tmp/webhook.yaml.yaml
+  when: role == 'master'
+- name: copy cloud-es-crud-agent.yaml
+  copy: src=cloud-es-crud-agent.yaml dest=/tmp/
+  when: role == 'master'
+- name: create  cloud-es-crud-agent 
+  shell: kubectl create -f /tmp/cloud-es-crud-agent.yaml
+  when: role == 'master'
+- name: copy ssmserver 
+  copy: src=ssmsserver.yaml dest=/tmp/
+  when: role == 'master'
+- name: create ssmserver 
+  shell: kubectl create -f /tmp/ssmserver.yaml
+  when: role == 'master'
+- name: copy nginx-ingress-controller.yaml 
+  copy: src=nginx-ingress-controller.yaml dest=/tmp/
+  when: role == 'master'
+- name: create nginx-ingress-controller.yaml 
+  shell: kubectl create -f /tmp/nginx-ingres-controller.yaml
+  when: role == 'master'
+
+

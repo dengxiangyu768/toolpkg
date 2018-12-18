@@ -1,0 +1,27 @@
+- include_vars: ../../../group_vars/{{ project }}.yml 
+- name: copy disable_selinux.sh
+  copy: src=disable_selinux.sh dest=/tmp/
+- name: system conf
+  copy: src=k8s.conf dest=/etc/sysctl.d/
+- name: disable selinux
+  shell: /bin/bash /tmp/disable_selinux.sh 
+- name: copy modify /etc/hosts script
+  template: src=modify_harbor_domain.sh dest=/tmp/
+- name: add harbor host
+  shell: /bin/bash /tmp/modify_harbor_domain.sh 
+- name: wget docker_engine
+  copy: src=docker-engine-1.12.6.rpm dest=/tmp/
+- name: wget docker_engine-selinux
+  copy: src=docker-engine-selinux-1.12.6.rpm dest=/tmp/
+- name: install docker-engine
+  yum: name=/tmp/docker-engine-1.12.6.rpm state=present
+- name: install docker-engine-selinux
+  yum: name=/tmp/docker-engine-selinux-1.12.6.rpm state=present
+- name: modify docker config
+  template: src=docker.service dest=/usr/lib/systemd/system/docker.service 
+- name: reload docker
+  shell: systemctl daemon-reload
+- name: enable docker
+  shell: systemctl enable docker 
+- name: start docker
+  shell: systemctl restart docker

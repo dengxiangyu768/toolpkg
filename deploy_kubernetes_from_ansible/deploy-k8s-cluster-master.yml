@@ -1,0 +1,7 @@
+- name: deploy high_available_kubernetes
+  hosts: lenovo_kubernetes_master
+  roles:
+    - install_docker 
+    - install_etcd_cluster
+    - install_k8s_cluster
+    - deploy_service

@@ -1,0 +1,4 @@
+- name: copy install rsync script
+  copy: src=install_rsyncd.sh dest=/tmp/
+- name: install rsyncd.sh
+  shell: /bin/bash /tmp/install_rsyncd.sh

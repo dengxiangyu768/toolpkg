@@ -1,0 +1,98 @@
+piVersion: apps/v1beta1
+kind: Deployment
+metadata:
+    name: cdmserver
+    namespace: cloud
+spec:
+    selector:
+      matchLabels:
+        app: cdmserver
+        tier: backend
+    minReadySeconds: 5
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 50%
+        maxUnavailable: 0
+    replicas: 1
+    template:
+        metadata:
+            annotations: {}
+            labels:
+                app: cdmserver
+                tier: backend
+        spec:
+            terminationGracePeriodSeconds: 60   
+            initContainers:
+                - name: wait-for-rsync
+                  image: docker.v2.aispeech.com/aispeech/cdm-rsync:0.0.1
+                  imagePullPolicy: Always
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  volumeMounts:
+                    - name: cloud-cdmserver-data
+                      mountPath: /data/resources/semantic/builtin_vocabs/         
+            containers:
+                - name: cdmserver
+                  image: docker.v2.aispeech.com/aispeech/cdmserver:{{ cdmserver_version }}
+                  imagePullPolicy: IfNotPresent
+                  readinessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 28002
+                    initialDelaySeconds: 10
+                    periodSeconds: 60
+                    timeoutSeconds: 10
+                    failureThreshold: 2
+                    successThreshold: 1
+                  livenessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 28002
+                    initialDelaySeconds: 10
+                    periodSeconds: 60
+                    timeoutSeconds: 10
+                    failureThreshold: 2
+                    successThreshold: 1
+                  lifecycle:
+                    preStop:
+                      exec:
+                        command: ["/opt/aispeech/openresty/nginx/sbin/nginx", "-p", "/opt/aispeech", "-c", "/opt/aispeech/conf/nginx.conf", "-s", "quit"]                  
+                  ports:
+                    - containerPort: 28002
+                  env:
+                    - name: NODENAME
+                      valueFrom:  
+                        fieldRef:  
+                          fieldPath: spec.nodeName                    
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  volumeMounts:
+                    - name: cloud-cdmserver-data
+                      mountPath: /data/resources/semantic/builtin_vocabs/
+                    - name: resserver-data
+                      mountPath: /opt/aispeech/resources/resserver
+            volumes:
+                - name: "cloud-cdmserver-data"
+                  hostPath:
+                    path: "/data/resources/semantic/builtin_vocabs/"
+                - name: "resserver-data"
+                  hostPath:
+                    path: "/data/share/resserver"                        
+            nodeSelector:
+                cdmserver: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: cdmserver
+    namespace: cloud
+spec:
+    ports:
+    - port: 28002
+      targetPort: 28002
+    selector:
+        app: cdmserver
+        tier: backend

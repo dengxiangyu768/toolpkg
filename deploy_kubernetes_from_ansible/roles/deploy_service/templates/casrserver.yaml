@@ -1,0 +1,118 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+    name: casrserver
+    namespace: cloud
+spec:
+    selector:
+      matchLabels:
+        app: casrserver
+        tier: backend
+    minReadySeconds: 5
+    updateStrategy:
+      type: RollingUpdate
+      maxUnavailable: 0        
+    template:
+        metadata:
+            annotations: {}
+            labels:
+                app: casrserver
+                tier: backend
+        spec:
+            terminationGracePeriodSeconds: 60
+            initContainers:
+                - name: wait-for-rsync
+                  image: docker.v2.aispeech.com/aispeech/rsync:{{ casrserver_version }}
+                  imagePullPolicy: Always
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  volumeMounts:
+                    - name: casr-data
+                      mountPath: /opt/aispeech/olive/modules
+            volumes:
+                - name: "casr-data"
+                  hostPath:
+                    path: "/data/resources/resource"                        
+            containers:                             
+                - name: casrserver
+                  image: docker.v2.aispeech.com/aispeech/casrserver:{{ casrserver_version }}
+                  imagePullPolicy: IfNotPresent
+                  livenessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 28002
+                    initialDelaySeconds: 2
+                    periodSeconds: 60
+                    timeoutSeconds: 10
+                  readinessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 28002
+                    initialDelaySeconds: 2
+                    periodSeconds: 60
+                    timeoutSeconds: 10
+                    failureThreshold: 2
+                    successThreshold: 1
+                  lifecycle:
+                    postStart:
+                      exec:
+                        command: ["/bin/bash", "-c", "echo hello"]                  
+                    preStop:
+                      exec:
+                        command: ["/opt/aispeech/olive/openresty/nginx/sbin/nginx", "-p", "/opt/aispeech/olive/", "-c", "/opt/aispeech/olive/conf/nginx.conf", "-s", "quit"]
+                  ports:
+                    - containerPort: 28002
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  volumeMounts:
+                    - name: casr-data
+                      mountPath: /opt/aispeech/olive/modules
+                    - name: resserver-data
+                      mountPath: /opt/aispeech/olive/res
+                - name: cuda
+                  image: docker.v2.aispeech.com/aispeech/cuda:0.2.1
+                  imagePullPolicy: IfNotPresent
+                  command: ['/bin/bash','-c','/opt/run.sh']
+                  ports:
+                    - containerPort: 9000
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config                      
+                  volumeMounts:
+                    - name: cuda-data
+                      mountPath: /opt
+                    - name: nvidia-driver
+                      mountPath: /usr/local/nvidia/
+                      readOnly: true
+            volumes:
+                - name: "casr-data"
+                  hostPath:
+                    path: "/data/resources/resource"
+                - name: "resserver-data"
+                  hostPath:
+                    path: "/data/share/resserver"
+                - name: "nvidia-driver"
+                  hostPath:
+                    path: "/var/lib/nvidia-docker/volumes/nvidia_driver/381.22"
+                - name: "cuda-data"
+                  hostPath:
+                    path: "/data/resources/resource/olive.core.wfst/res/dui_forward_v01"
+            nodeSelector:
+                casrserver: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: casrserver
+    namespace: cloud
+spec:
+    type: NodePort
+    ports:
+    - port: 28002
+      targetPort: 28002
+      nodePort: 31002
+    selector:
+        app: casrserver
+        tier: backend

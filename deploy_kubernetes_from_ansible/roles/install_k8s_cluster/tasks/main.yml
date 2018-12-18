@@ -1,0 +1,33 @@
+- include_vars: ../../../group_vars/{{ project }}.yml
+- name: copy install script
+  template: src=install_kubernetes.sh dest=/tmp/
+- name: wget kubeadm,kubelet,kubectl,kubernetes-cni 
+  shell: /bin/bash /tmp/install_kubernetes.sh 
+- name: copy init cluster config 
+  template: src=kubeadm_init.yml dest=/tmp/
+- name: init cluster
+  shell: kubeadm init --config=/tmp/kubeadm_init.yml
+  when: role == 'master'
+- name: copy script
+  copy: src=source_env.sh dest=/tmp/
+- name: copy flannel
+  copy: src=flannel.yaml dest=/tmp/
+- name: source env and create flannel 
+  shell: /bin/bash /tmp/source_env.sh 
+  when: role == 'master'
+- name: scp kubernetes.config script
+  template: src=scp_kubernetes_config.sh dest=/tmp/
+  when: role == 'master'
+- name: scp kubernete.config 
+  shell: /bin/bash /tmp/scp_kubernetes_config.sh
+  when: role == 'master'
+- name: gen and scp gen apiserver.pki script
+  template: src=gen_apiserver_pem.sh dest=/tmp/ 
+- name: gen kubernete config and copy 
+  shell: /bin/bash /tmp/gen_apiserver_pem.sh
+- name: copy modify_ip.sh 
+  template: src=modify_ip.sh dest=/tmp/
+  when: role == 'slave' 
+- name: modify kubernete slave kubelet apiserver ip
+  shell: /bin/bash /tmp/modify_ip.sh
+  when: role == 'slave' 

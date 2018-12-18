@@ -1,0 +1,11 @@
+[lenovo_kubernetes_master]
+47.96.69.150 role=master project=lenovo
+47.96.66.9 role=slave project=lenovo
+47.98.238.27 role=slave project=lenovo
+
+[lenovo_kubernetes_node]
+47.97.197.172 role=node project=lenovo service=casrserver
+
+
+[lenovo_kubernetes_public]
+47.97.168.142 project=lenovo role=public

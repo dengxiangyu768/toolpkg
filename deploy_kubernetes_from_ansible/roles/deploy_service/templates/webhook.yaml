@@ -1,0 +1,74 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+    name: webhook
+    namespace: cloud
+spec:
+    selector:
+      matchLabels:
+        app: webhook
+        tier: backend
+    minReadySeconds: 5
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 50%
+        maxUnavailable: 0
+    replicas: 1
+    template:
+        metadata:
+            annotations: {}
+            labels:
+                app: webhook
+                tier: backend
+        spec:
+            terminationGracePeriodSeconds: 60
+            containers:
+                - name: webhook
+                  image: docker.v2.aispeech.com/aispeech/webhook:{{ webhook_version }}
+                  imagePullPolicy: IfNotPresent
+                  livenessProbe:
+                    exec:
+                      command:
+                        - /opt/aispeech/health_check.py
+                    initialDelaySeconds: 2
+                    periodSeconds: 30
+                    timeoutSeconds: 10
+                  readinessProbe:
+                    exec:
+                      command:
+                        - /opt/aispeech/health_check.py
+                    initialDelaySeconds: 2
+                    periodSeconds: 30
+                    timeoutSeconds: 10
+                    failureThreshold: 2
+                    successThreshold: 1
+                  lifecycle:
+                    preStop:
+                      exec:
+                        command: ["/opt/aispeech/openresty/nginx/sbin/nginx", "-p", "/opt/aispeech", "-c", "/opt/aispeech/conf/nginx.conf", "-s", "quit"]                  
+                  ports:
+                    - containerPort: 28002
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  env:
+                    - name: POD_IP
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: status.podIP
+            nodeSelector:
+                webhook: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: webhook
+    namespace: cloud
+spec:
+    ports:
+    - port: 28002
+      targetPort: 28002
+    selector:
+        app: webhook
+        tier: backend

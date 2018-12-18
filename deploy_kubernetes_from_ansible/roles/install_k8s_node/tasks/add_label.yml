@@ -1,0 +1,4 @@
+- name: copy add_label.sh script 
+  template: src=add_label.sh dest=/tmp/add_label.sh
+- name: add_label
+  shell: /bin/bash /tmp/add_label.sh 

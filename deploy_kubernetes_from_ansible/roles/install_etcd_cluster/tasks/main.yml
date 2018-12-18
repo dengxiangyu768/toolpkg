@@ -1,0 +1,11 @@
+- include_vars: ../../../group_vars/{{ project }}.yml
+- name: copy get images script
+  template: src=get_images.sh dest=/tmp/
+- name: download images
+  shell: /bin/bash /tmp/get_images.sh
+- name: directory check 
+  file: path=/data/resources/etcd-cluster  state=directory mode=0755
+- name: cp install etcd script 
+  template: src=start_etcd.sh dest=/tmp/start_etcd.sh
+- name: install etcd
+  shell: /bin/bash /tmp/start_etcd.sh

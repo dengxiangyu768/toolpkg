@@ -1,0 +1,18 @@
+---
+harbor_domain: "docker.v2.aispeech.com"
+harbor_addr: "10.15.11.49"
+service_domain: "s.dui.ai"
+kubernetes_token: "a89c44.c62ed98e04161311"
+master1_ip: "10.32.3.230"
+master2_ip: "10.32.3.231"
+master3_ip: "10.32.3.232"
+apiserver_load_balance_ip: "10.32.3.233"
+casrserver_version: "0.0.1"
+cloud-es-crud-agent_version: "0.0.1"
+ddsserver_version: "0.0.1"
+ttsserver_version: "0.0.1"
+cdmserver_version: "0.0.1"
+webhook_version: "0.0.1"
+cnluserver_version: "0.0.1"
+ssmserver_version: "0.0.1"
+

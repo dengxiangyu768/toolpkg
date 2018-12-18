@@ -1,0 +1,5 @@
+---
+kubelet_addr: "http://7xp70x.com1.z0.glb.clouddn.com/kubelet-1.6.1-0.x86_64.rpm"
+kubectl_addr: "http://7xp70x.com1.z0.glb.clouddn.com/kubectl-1.6.1-0.x86_64.rpm"
+kubeadm_addr: "http://7xp70x.com1.z0.glb.clouddn.com/kubeadm-1.6.1-0.x86_64.rpm"
+kubernetes_cni_addr: "http://7xp70x.com1.z0.glb.clouddn.com/kubernetes-cni-0.5.1-0.x86_64.rpm"

@@ -1,0 +1,7 @@
+- name: deploy public depend
+  hosts: lenovo_kubernetes_public
+  roles:
+    - install_docker
+    - install_harbor
+    - install_rsyslogd
+    - install_rsyncd

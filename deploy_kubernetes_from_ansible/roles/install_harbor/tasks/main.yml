@@ -1,0 +1,4 @@
+- name: copy install scripyt
+  copy: src=install_harbor.sh dest=/tmp/
+- name: install harbor
+  shell: /bin/bash /tmp/install_harbor.sh

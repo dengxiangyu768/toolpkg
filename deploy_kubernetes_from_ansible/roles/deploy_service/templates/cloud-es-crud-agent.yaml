@@ -1,0 +1,78 @@
+apiVersion: apps/v1beta1
+kind: DaemonSet
+metadata:
+    name: cloud-es-crud-agent
+    namespace: cloud
+spec:
+    selector:
+      matchLabels:
+        app: cloud-es-crud-agent
+        tier: backend
+    minReadySeconds: 5
+    updateStrategy:
+      type: RollingUpdate
+      maxUnavailable: 0
+    template:
+        metadata:
+            annotations: {}
+            labels:
+                app: cloud-es-crud-agent
+                tier: backend
+        spec:
+            terminationGracePeriodSeconds: 60
+            containers:
+                - name: cloud-es-crud-agent
+                  image: docker.v2.aispeech.com/aispeech/cloud-es-crud-agent:{{ cloud-es-crud-agent_version }}
+                  imagePullPolicy: IfNotPresent
+                  livenessProbe:
+                    exec:
+                      command:
+                        - /opt/aispeech/es-crud-agent/healthcheck/health_check.sh
+                    initialDelaySeconds: 2
+                    periodSeconds: 5
+                    timeoutSeconds: 10
+                  readinessProbe:
+                    exec:
+                      command:
+                        - /opt/aispeech/es-crud-agent/healthcheck/health_check.sh
+                    initialDelaySeconds: 2
+                    periodSeconds: 2
+                    timeoutSeconds: 10
+                    failureThreshold: 2
+                    successThreshold: 1
+                  lifecycle:
+                    preStop:
+                      exec:
+                        command: ["/opt/aispeech/openresty/nginx/sbin/nginx", "-p", "/opt/aispeech/es-crud-agent/", "-c", "/opt/aispeech/solr-service/conf/nginx-dev.conf", "-s", "quit"]                                                      
+                  ports:
+                    - containerPort: 10000
+                  env:
+                    - name: MY_NAMESPACE
+                      valueFrom:  
+                        fieldRef:  
+                          fieldPath: metadata.namespace
+                  envFrom:
+                    - configMapRef:
+                        name: cloud-config
+                  volumeMounts:
+                    - name: odcp-es-crud-agent-data
+                      mountPath: /opt/aispeech/es-crud-agent/third/cpDocker/dat
+            volumes:
+                - name: "odcp-es-crud-agent-data"
+                  hostPath:
+                    path: "/data/resources/qa/dat"                        
+            nodeSelector:
+                cloud-es-crud-agent: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: cloud-es-crud-agent
+    namespace: cloud
+spec:
+    ports:
+    - port: 10000
+      targetPort: 10000
+    selector:
+        app: cloud-es-crud-agent
+        tier: backend

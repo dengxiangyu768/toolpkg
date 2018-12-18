@@ -1,0 +1,5 @@
+- name: wget kubeadm,kubelet 
+  template: src=init_node.sh dest=/tmp/
+- name: install kubeadm kubelet
+  shell: /bin/bash /tmp/init_node.sh
+  
